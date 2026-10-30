@@ -1,0 +1,1136 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Super Mario: Kembara Nubuwwah & Kitab</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts for Arcade & Modern Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Kanit:wght@400;600;700&family=Press+Start+2P&display=swap" rel="stylesheet">
+
+    <style>
+        /* Custom Mario Theme Styles */
+        body {
+            font-family: 'Kanit', sans-serif;
+            background-color: #1a1c23;
+            color: #ffffff;
+            user-select: none;
+        }
+
+        .font-arcade {
+            font-family: 'Press Start 2P', cursive;
+        }
+
+        .font-heading {
+            font-family: 'Fredoka', sans-serif;
+        }
+
+        /* Mario Retro Palette Colors */
+        .bg-mario-sky { background-color: #5c94fc; }
+        .bg-mario-red { background-color: #e52521; }
+        .bg-mario-green { background-color: #00a800; }
+        .bg-mario-yellow { background-color: #f8b800; }
+        .bg-mario-brown { background-color: #e45c10; }
+        .bg-mario-brick { background-color: #b84400; }
+
+        .text-mario-yellow { color: #f8b800; }
+        .text-mario-red { color: #e52521; }
+        .text-mario-green { color: #00a800; }
+
+        .border-mario-yellow { border-color: #f8b800; }
+        .border-mario-red { border-color: #e52521; }
+
+        /* Pixelated Retro Borders */
+        .pixel-box {
+            box-shadow: 
+                -4px 0 0 0 #000,
+                4px 0 0 0 #000,
+                0 -4px 0 0 #000,
+                0 4px 0 0 #000,
+                0 0 0 4px #f8b800;
+        }
+
+        .pixel-box-red {
+            box-shadow: 
+                -4px 0 0 0 #000,
+                4px 0 0 0 #000,
+                0 -4px 0 0 #000,
+                0 4px 0 0 #000,
+                0 0 0 4px #e52521;
+        }
+
+        .pixel-box-green {
+            box-shadow: 
+                -4px 0 0 0 #000,
+                4px 0 0 0 #000,
+                0 -4px 0 0 #000,
+                0 4px 0 0 #000,
+                0 0 0 4px #00a800;
+        }
+
+        /* Retro Button Press Effects */
+        .btn-mario {
+            transition: transform 0.05s ease, box-shadow 0.05s ease;
+            box-shadow: 0 6px 0 #801800, 0 8px 10px rgba(0,0,0,0.5);
+        }
+        .btn-mario:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #801800, 0 3px 5px rgba(0,0,0,0.5);
+        }
+
+        .btn-mario-green {
+            box-shadow: 0 6px 0 #005800, 0 8px 10px rgba(0,0,0,0.5);
+        }
+        .btn-mario-green:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #005800, 0 3px 5px rgba(0,0,0,0.5);
+        }
+
+        /* Shake animation for wrong answer */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-8px); }
+            40%, 80% { transform: translateX(8px); }
+        }
+        .animate-shake {
+            animation: shake 0.4s ease-in-out;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1a1c23;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #f8b800;
+            border-radius: 4px;
+        }
+
+        /* Print Styling for Official Records */
+        @media print {
+            body {
+                background: white !important;
+                color: black !important;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .print-only {
+                display: block !important;
+            }
+            .pixel-box, .pixel-box-green, .pixel-box-red {
+                box-shadow: none !important;
+                border: 2px solid #000 !important;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-2 sm:p-4 bg-slate-900 overflow-x-hidden">
+
+    <!-- CONTAINER UTAMA -->
+    <div class="w-full max-w-5xl bg-slate-800 rounded-2xl shadow-2xl border-4 border-amber-500 overflow-hidden relative">
+
+        <!-- HEADER TOP HUD (Dipaparkan Semasa Game & Result) -->
+        <header id="mario-hud" class="hidden bg-black border-b-4 border-amber-500 p-3 text-white font-arcade text-xs sm:text-sm tracking-wider no-print">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-center items-center">
+                <div class="text-left">
+                    <span class="text-amber-400 block text-[10px] sm:text-xs">PELAJAR</span>
+                    <span id="hud-student-name" class="text-white font-sans font-bold truncate block">NAME</span>
+                </div>
+                <div>
+                    <span class="text-amber-400 block text-[10px] sm:text-xs">KOD KELAS</span>
+                    <span id="hud-student-class" class="text-white font-sans font-bold block">CLASS</span>
+                </div>
+                <div>
+                    <span class="text-red-500 block text-[10px] sm:text-xs">MARKAH</span>
+                    <span id="hud-score" class="text-mario-yellow text-base sm:text-lg">000</span>
+                </div>
+                <div class="text-right flex items-center justify-end gap-2">
+                    <div>
+                        <span class="text-green-400 block text-[10px] sm:text-xs">CHECKPOINT</span>
+                        <span id="hud-checkpoint" class="text-white">1/10</span>
+                    </div>
+                    <!-- Mute / Sound Toggle -->
+                    <button id="btn-sound-toggle" onclick="toggleSound()" class="ml-2 bg-slate-700 hover:bg-slate-600 p-2 rounded text-sm text-amber-300 border border-amber-400" title="Buka/Tutup Bunyi">
+                        🔊
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- ========================================================= -->
+        <!-- 1. SKRIN PERMULAAN (START SCREEN)                         -->
+        <!-- ========================================================= -->
+        <section id="screen-start" class="p-6 sm:p-10 flex flex-col items-center justify-center text-center min-h-[550px] bg-gradient-to-b from-sky-600 via-sky-500 to-amber-700 relative overflow-hidden">
+            <!-- Retro Cloud Decor -->
+            <div class="absolute top-4 left-6 w-20 h-8 bg-white/80 rounded-full blur-[1px] shadow-sm"></div>
+            <div class="absolute top-10 right-10 w-28 h-10 bg-white/80 rounded-full blur-[1px] shadow-sm"></div>
+
+            <!-- Title Header -->
+            <div class="mb-6 z-10">
+                <span class="bg-red-600 text-white text-xs sm:text-sm font-arcade px-3 py-1 rounded shadow-md border-2 border-amber-300 tracking-widest uppercase inline-block mb-2">
+                    Pengajian Akidah Islam Universiti
+                </span>
+                <h1 class="font-arcade text-2xl sm:text-4xl md:text-5xl text-mario-yellow drop-shadow-[0_4px_0_rgba(0,0,0,1)] tracking-tight leading-tight">
+                    SUPER MARIO
+                </h1>
+                <h2 class="font-heading text-xl sm:text-3xl text-white font-bold drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] mt-1">
+                    Kembara Nubuwwah & Kitab
+                </h2>
+            </div>
+
+            <!-- Form Box -->
+            <div class="w-full max-w-md bg-black/80 backdrop-blur-md p-6 rounded-xl pixel-box z-10 my-2">
+                <p class="text-amber-300 font-sans font-semibold text-sm mb-4">
+                    Sila masukkan Maklumat Pelajar sebelum memulakan cabaran kuiz berasaskan silabus tinggi Akidah Islam.
+                </p>
+
+                <div class="space-y-4 text-left">
+                    <div>
+                        <label for="input-name" class="block font-arcade text-xs text-amber-400 mb-1">NAMA PELAJAR:</label>
+                        <input type="text" id="input-name" placeholder="CONTOH: AHMAD ZAKI BIN ROSLI" 
+                               class="w-full px-4 py-3 bg-slate-900 border-2 border-amber-400 rounded text-white font-sans font-bold text-sm focus:outline-none focus:ring-2 focus:ring-red-500 uppercase tracking-wide uppercase-input" 
+                               autocomplete="off" required />
+                    </div>
+
+                    <div>
+                        <label for="input-class" class="block font-arcade text-xs text-amber-400 mb-1">KELAS / KUMPULAN (KOD SAHAJA):</label>
+                        <input type="text" id="input-class" placeholder="CONTOH: CS1431A" 
+                               class="w-full px-4 py-3 bg-slate-900 border-2 border-amber-400 rounded text-white font-sans font-bold text-sm focus:outline-none focus:ring-2 focus:ring-red-500 uppercase tracking-wide uppercase-input" 
+                               autocomplete="off" required />
+                    </div>
+                </div>
+
+                <!-- Info Peraturan -->
+                <div class="mt-4 p-3 bg-slate-900/90 rounded border border-amber-500/40 text-xs text-slate-300 font-sans space-y-1">
+                    <div class="flex items-center gap-1 text-amber-300 font-bold">
+                        <span>🎯 SYARAT & REKA BENTUK PEMARKAHAN:</span>
+                    </div>
+                    <p>• 10 Checkpoint berperingkat (Nubuwwah & Kitab).</p>
+                    <p>• Jawapan Betul: <span class="text-green-400 font-bold">+10 Markah</span>.</p>
+                    <p>• Jawapan Salah: <span class="text-red-400 font-bold">-5 Markah Penalti</span> (Boleh cuba sampai betul).</p>
+                </div>
+
+                <!-- Start Button -->
+                <button id="btn-start" onclick="startGame()" disabled
+                        class="w-full mt-6 py-4 bg-mario-red hover:bg-red-600 disabled:bg-slate-700 disabled:opacity-50 text-white font-arcade text-sm rounded-lg border-2 border-amber-300 btn-mario cursor-pointer disabled:cursor-not-allowed uppercase tracking-wider">
+                    🚀 MULA KEMBARA MARIO
+                </button>
+            </div>
+
+            <!-- Footer Note -->
+            <p class="text-xs text-white/90 font-sans mt-4 z-10">
+                Aras Kesukaran: <span class="text-mario-yellow font-bold">SANGAT SUKAR (UNIVERSITI)</span>
+            </p>
+        </section>
+
+
+        <!-- ========================================================= -->
+        <!-- 2. SKRIN PERMAINAN & KANVAS MARIO (GAME SCREEN)            -->
+        <!-- ========================================================= -->
+        <section id="screen-game" class="hidden flex flex-col items-center bg-slate-900 p-3 sm:p-6 relative">
+            
+            <!-- Progress Bar -->
+            <div class="w-full bg-slate-800 rounded-full h-4 border-2 border-amber-400 mb-3 overflow-hidden p-0.5">
+                <div id="game-progress-bar" class="bg-gradient-to-r from-amber-500 to-green-500 h-full rounded-full transition-all duration-500" style="width: 10%;"></div>
+            </div>
+
+            <!-- Mario Canvas Level Animation Stage -->
+            <div class="w-full relative bg-mario-sky rounded-xl overflow-hidden border-4 border-amber-400 shadow-xl mb-4" style="height: 280px;">
+                <canvas id="mario-canvas" width="900" height="280" class="w-full h-full block"></canvas>
+                
+                <!-- Overlay Banner Banner Hint -->
+                <div id="stage-banner" class="absolute top-2 left-1/2 -translate-x-1/2 bg-black/75 border border-amber-400 text-amber-300 font-arcade text-[10px] sm:text-xs px-4 py-1.5 rounded-full shadow">
+                    CHECKPOINT <span id="banner-checkpoint-num">1</span>: NUBUWWAH & KITAB
+                </div>
+            </div>
+
+            <!-- Action Trigger Button (When modal is closed) -->
+            <div class="w-full flex justify-center mb-2">
+                <button id="btn-open-question" onclick="openCurrentQuestionModal()" 
+                        class="px-6 py-3 bg-mario-yellow hover:bg-amber-400 text-black font-arcade text-xs sm:text-sm rounded-lg border-2 border-black shadow-lg btn-mario animate-bounce">
+                    ❓ BUKA SOALAN CHECKPOINT <span id="btn-checkpoint-tag">1</span>
+                </button>
+            </div>
+
+            <!-- ========================================================= -->
+            <!-- MODAL SOALAN KUIZ (QUIZ QUESTION POPUP)                   -->
+            <!-- ========================================================= -->
+            <div id="quiz-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-4 transition-opacity duration-300">
+                <div id="quiz-modal-card" class="bg-slate-900 border-4 border-amber-400 rounded-xl max-w-2xl w-full p-4 sm:p-6 pixel-box relative text-white max-h-[90vh] overflow-y-auto">
+                    
+                    <!-- Modal Header -->
+                    <div class="flex justify-between items-center border-b-2 border-amber-400/50 pb-3 mb-4">
+                        <div class="flex items-center gap-2">
+                            <span class="bg-mario-red text-white text-[10px] sm:text-xs font-arcade px-2.5 py-1 rounded border border-amber-300">
+                                CHECKPOINT <span id="modal-cp-num">1</span>/10
+                            </span>
+                            <span id="modal-topic-tag" class="bg-blue-700 text-amber-200 text-xs font-bold font-sans px-2.5 py-1 rounded uppercase">
+                                AL-NUBUWWAH
+                            </span>
+                        </div>
+                        <span class="text-xs font-arcade text-mario-yellow">+10 PTS / -5 PENALTI</span>
+                    </div>
+
+                    <!-- Question Text -->
+                    <div class="mb-5">
+                        <h3 id="modal-question-text" class="text-sm sm:text-base md:text-lg font-sans font-bold text-amber-100 leading-relaxed">
+                            Soalan akan dimuatkan di sini...
+                        </h3>
+                    </div>
+
+                    <!-- Answer Options -->
+                    <div id="modal-options-container" class="space-y-2.5 mb-4">
+                        <!-- Options injected dynamically by JS -->
+                    </div>
+
+                    <!-- Feedback Box (Dynamic output for wrong/correct) -->
+                    <div id="modal-feedback" class="hidden p-3 rounded-lg text-xs sm:text-sm font-sans font-bold border mb-3">
+                        <!-- Feedback text -->
+                    </div>
+
+                    <!-- Next / Continue Button (Shown after answering correctly) -->
+                    <button id="btn-next-checkpoint" onclick="advanceCheckpoint()" class="hidden w-full py-3 bg-mario-green hover:bg-green-600 text-white font-arcade text-xs sm:text-sm rounded-lg border-2 border-amber-300 btn-mario-green">
+                        ➡️ TERUSKAN KEMBARA KE CHECKPOINT SETERUSNYA
+                    </button>
+                </div>
+            </div>
+
+        </section>
+
+
+        <!-- ========================================================= -->
+        <!-- 3. SKRIN KEPUTUSAN AKHIR (RESULT / RECORD SCREEN)          -->
+        <!-- ========================================================= -->
+        <section id="screen-result" class="hidden p-6 sm:p-10 bg-slate-900 text-white min-h-[550px] relative">
+            
+            <!-- Result Header -->
+            <div class="text-center mb-6">
+                <span class="bg-mario-green text-white font-arcade text-xs px-3 py-1 rounded border border-amber-300 uppercase inline-block mb-2">
+                    Laporan Prestasi Akademik
+                </span>
+                <h1 class="font-arcade text-2xl sm:text-4xl text-mario-yellow drop-shadow-[0_2px_0_rgba(0,0,0,1)]">
+                    KEPUTUSAN KEMBARA AKIDAH
+                </h1>
+                <p class="text-slate-300 text-xs sm:text-sm font-sans mt-1">
+                    Modul Nubuwwah & Kitab • Pengajian Akidah Islam IPT
+                </p>
+            </div>
+
+            <!-- Student Summary Card -->
+            <div class="bg-black/70 border-2 border-amber-400 rounded-xl p-4 sm:p-6 mb-6 pixel-box">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 border-b border-slate-700 pb-4 mb-4">
+                    <div>
+                        <span class="text-xs text-amber-400 font-arcade block mb-1">NAMA PELAJAR:</span>
+                        <span id="res-student-name" class="text-base sm:text-lg font-bold font-sans text-white uppercase block">---</span>
+                    </div>
+                    <div>
+                        <span class="text-xs text-amber-400 font-arcade block mb-1">KOD KELAS:</span>
+                        <span id="res-student-class" class="text-base sm:text-lg font-bold font-sans text-white uppercase block">---</span>
+                    </div>
+                </div>
+
+                <!-- Stats Grid -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+                    <div class="bg-slate-800/80 p-3 rounded-lg border border-slate-700">
+                        <span class="text-[10px] font-arcade text-slate-400 block mb-1">JUMLAH MARKAH</span>
+                        <span id="res-final-score" class="text-xl sm:text-3xl font-arcade text-mario-yellow">0</span>
+                        <span class="text-[10px] text-slate-400 block">/ 100 NISBAH</span>
+                    </div>
+
+                    <div class="bg-slate-800/80 p-3 rounded-lg border border-slate-700">
+                        <span class="text-[10px] font-arcade text-slate-400 block mb-1">SALAH (PENALTI)</span>
+                        <span id="res-wrong-count" class="text-xl sm:text-3xl font-arcade text-mario-red">0</span>
+                        <span class="text-[10px] text-slate-400 block">KALI CUBAN</span>
+                    </div>
+
+                    <div class="bg-slate-800/80 p-3 rounded-lg border border-slate-700">
+                        <span class="text-[10px] font-arcade text-slate-400 block mb-1">KETEPATAN (1ST TRY)</span>
+                        <span id="res-accuracy" class="text-xl sm:text-3xl font-arcade text-green-400">0%</span>
+                        <span class="text-[10px] text-slate-400 block">PERATUSAN</span>
+                    </div>
+
+                    <div class="bg-slate-800/80 p-3 rounded-lg border border-slate-700">
+                        <span class="text-[10px] font-arcade text-slate-400 block mb-1">GRED / ANUGERAH</span>
+                        <span id="res-grade-title" class="text-xs sm:text-sm font-bold font-sans text-mario-yellow block mt-1">MUMTAZ</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Breakdown Detail Table -->
+            <div class="mb-6">
+                <h3 class="font-arcade text-xs text-amber-400 mb-3 flex items-center gap-2">
+                    📋 ANALISIS PENCAPAIAN MENGIKUT CHECKPOINT:
+                </h3>
+                <div class="bg-black/60 border border-slate-700 rounded-lg overflow-x-auto">
+                    <table class="w-full text-left font-sans text-xs sm:text-sm">
+                        <thead class="bg-slate-800 text-amber-300 font-arcade text-[10px]">
+                            <tr>
+                                <th class="p-2.5 text-center">CP</th>
+                                <th class="p-2.5">TOPIK / FOKUS SOALAN</th>
+                                <th class="p-2.5 text-center">PERCUBAAN SALAH</th>
+                                <th class="p-2.5 text-center">STATUS</th>
+                            </tr>
+                        </thead>
+                        <tbody id="res-table-body" class="divide-y divide-slate-800 text-slate-200">
+                            <!-- Injected by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-col sm:flex-row gap-3 justify-center no-print">
+                <button onclick="restartGame()" class="px-6 py-3.5 bg-mario-red hover:bg-red-600 text-white font-arcade text-xs rounded-lg border-2 border-amber-300 btn-mario">
+                    🔄 MAINKAN SEMULA
+                </button>
+                <button onclick="window.print()" class="px-6 py-3.5 bg-mario-green hover:bg-green-600 text-white font-arcade text-xs rounded-lg border-2 border-amber-300 btn-mario-green">
+                    🖨️ CETAK / SIMPAN REKOD PDF
+                </button>
+            </div>
+
+        </section>
+
+    </div>
+
+    <!-- ========================================================= -->
+    <!-- JAVASCRIPT GAME LOGIC & WEB AUDIO SYNTHESIZER             -->
+    <!-- ========================================================= -->
+    <script>
+        /* =========================================================
+         * 1. BANK SOALAN ARAS HIGH-LEVEL (UNIVERSITI)
+         * ========================================================= */
+        const QUIZ_BANK = [
+            {
+                id: 1,
+                topic: "AL-NUBUWWAH",
+                question: "Apakah kefahaman yang paling tepat mengenai sifat 'Al-Ijtiba' atau 'Al-Istifa' dalam konteks penganugerahan jawatan Kenabian dan Kerasulan?",
+                options: [
+                    "A. Pangkat kenabian diperoleh melalui usaha gigih, riyadhah rohani, dan kebersihan jiwa individu (Muktasab).",
+                    "B. Tapisan dan pilihan mutlak Ilahi yang tidak boleh diusahakan melalui amal ibadat atau ikhtiar manusia (Wahbi).",
+                    "C. Jawatan khas yang diwarisi secara keturunan daripada garis keturunan nabi-nabi terdahulu sahaja.",
+                    "D. Anugerah umum yang boleh dicapai oleh mana-mana individu yang mencapai makrifatiah tertinggi."
+                ],
+                correctIndex: 1, // Jawapan B
+                explanation: "Al-Ijtiba' / Al-Istifa' ialah pilihan dan tapisan terus daripada Allah SWT (Wahbi/Ilahi), bukannya hasil ikhtiar atau latihan rohani manusia (Muktasab)."
+            },
+            {
+                id: 2,
+                topic: "AL-NUBUWWAH",
+                question: "Menurut jumhur ulama akidah, manakah kenyataan yang tepat mengenai bilangan Nabi dan Rasul serta perbezaan tugasan risalah mereka?",
+                options: [
+                    "A. Nabi berjumlah 313 orang membawakan syariat baharu, manakala Rasul berjumlah 124,000 orang hanya mengukuhkan syariat.",
+                    "B. Bilangan Nabi dan Rasul adalah tepat 25 orang sahaja yang wajib diketahui dan tiada selain daripada jumlah itu.",
+                    "C. Bilangan Nabi dianggarkan 124,000 orang dan Rasul 313 orang; Rasul diutus dengan wahyu & syariat untuk disampaikan kepada umat, manakala Nabi menerima wahyu untuk dirinya sahaja.",
+                    "D. Setiap Nabi dikurniakan kitab dan suhuf tersendiri, manakala Rasul hanya menerima iktikad pegangan."
+                ],
+                correctIndex: 2, // Jawapan C
+                explanation: "Menurut hadis dan jumhur ulama, bilangan Nabi dianggarkan 124,000 dan Rasul 313 orang. Rasul ditugaskan menyampaikan syariat kepada umat, manakala Nabi untuk dirinya sendiri."
+            },
+            {
+                id: 3,
+                topic: "AL-NUBUWWAH",
+                question: "Dalam kerangka binaan Akidah Islam, Al-Nubuwwah diletakkan sebagai 'Wasilah' (Jalan/Perantara). Bagaimanakah peranan Wasilah ini berfungsi?",
+                options: [
+                    "A. Institusi kenabian menjadi perantara rasmi bagi Allah SWT menyampaikan hakikat Ilahiyyah dan acuan syariat kepada hamba-Nya.",
+                    "B. Wasilah sebagai pemutus hukum akal tanpa memerlukan sandaran wahyu Al-Kitab.",
+                    "C. Wasilah adalah matlamat akhir pengabdian manusia untuk mencapai keredhaan rasul semata-mata.",
+                    "D. Wasilah berfungsi sebagai pelengkap ikhtiar manusia selepas pembuktian sains moden."
+                ],
+                correctIndex: 0, // Jawapan A
+                explanation: "Al-Nubuwwah adalah Wasilah (jalan perantara) yang menyampaikan risalah Ilahiyyah kepada manusia, yang seterusnya memandu manusia memahami perkara Al-Ghaibiyyat."
+            },
+            {
+                id: 4,
+                topic: "AL-NUBUWWAH",
+                question: "Manakah antara berikut menerangkan secara tepat mengenai gelaran 'Ulul 'Azmi' yang dianugerahkan kepada lima orang Rasul pilihan (Nabi Nuh a.s., Nabi Ibrahim a.s., Nabi Musa a.s., Nabi Isa a.s., dan Nabi Muhammad SAW)?",
+                options: [
+                    "A. Gelaran khas bagi Rasul yang menerima kitab terbesar sahaja tanpa perlu menghadapi sebarang ujian dakwah.",
+                    "B. Gelaran khusus untuk para nabi yang diutuskan sebelum kewujudan syariat Nabi Ibrahim a.s.",
+                    "C. Gelaran bagi nabi yang dikurniakan kuasa memerintah kerajaan dunia dan kekayaan fizikal.",
+                    "D. Gelaran teragung bagi Rasul yang mempunyai tahap ketabahan, kesabaran, dan kecekalan luar biasa dalam memikul ujian serta tentangan berat kaum mereka."
+                ],
+                correctIndex: 3, // Jawapan D
+                explanation: "Ulul 'Azmi merupakan gelaran kehormatan bagi 5 Rasul terpilih yang sentiasa bersabar, teguh dan kuat menghadapi pelbagai cabaran serta penentangan dahsyat daripada umat mereka."
+            },
+            {
+                id: 5,
+                topic: "AL-KITAB",
+                question: "Mengapakah Kitab Zabur yang diturunkan kepada Nabi Daud a.s. tidak mengandungi syariat atau hukum perundangan baharu?",
+                options: [
+                    "A. Kerana Kitab Zabur telah diubah sepenuhnya oleh kaum Bani Israil sejurus selepas diturunkan.",
+                    "B. Kerana Nabi Daud a.s. diperintahkan oleh Allah SWT untuk mengikut dan mengamalkan syariat Kitab Taurat Nabi Musa a.s.",
+                    "C. Kerana Zabur hanya diturunkan khusus dalam bahasa Aramaik yang tidak mempunyai skrip perundangan.",
+                    "D. Kerana Zabur diturunkan hanya sebagai kitab ramalan masa depan dan bukannya petunjuk amalan."
+                ],
+                correctIndex: 1, // Jawapan B
+                explanation: "Kitab Zabur mengandungi doa, zikir, pengajaran, dan hikmah. Bagi hukum syariat, Nabi Daud a.s. diperintahkan meneruskan syariat Nabi Musa a.s. (Kitab Taurat)."
+            },
+            {
+                id: 6,
+                topic: "AL-KITAB",
+                question: "Apakah fenomena pindaian utama yang berlaku pada Kitab Taurat versi Yahudi hari ini jika dibandingkan dengan kandungan asalnya yang diturunkan kepada Nabi Musa a.s.?",
+                options: [
+                    "A. Menghapuskan keterangan mengenai Hari Kiamat, Syurga, Neraka serta menyembunyikan berita kedatangan Nabi Akhir Zaman.",
+                    "B. Menambah hukum-hukum fikah baharu tetapi mengekalkan berita tentang Kiamat dan Syurga.",
+                    "C. Mengubah bahasa pengantar daripada Bahasa Arab kepada Bahasa Ibrani sahaja.",
+                    "D. Menggabungkan kandungan Taurat bersama Injil Matius secara langsung."
+                ],
+                correctIndex: 0, // Jawapan A
+                explanation: "Kitab Taurat moden (Old Testament/Tanakh) telah diubah oleh tokoh Yahudi sehingga keterangan jelas mengenai Kiamat, Syurga, Neraka dan perkhabaran Nabi Muhammad SAW telah digugurkan."
+            },
+            {
+                id: 7,
+                topic: "AL-KITAB",
+                question: "Apakah perbezaan mendasar dari sudut 'Tuntutan Keimanan' antara Al-Quran dengan kitab-kitab samawi terdahulu (Taurat, Zabur, Injil)?",
+                options: [
+                    "A. Kitab terdahulu wajib dipelajari dan diamalkan syariatnya sepanjang zaman, manakala Al-Quran sekadar dipercayai kewujudannya.",
+                    "B. Tidak ada sebarang perbezaan tuntutan kerana semua kitab wajib dilaksanakan hukum syariatnya secara serentak.",
+                    "C. Al-Quran menuntut umat Islam percaya, mempelajari, memahami, dan melaksanakan syariatnya; manakala kitab lain hanya dituntut percaya kewujudannya tanpa mengamalkan syariatnya kini.",
+                    "D. Al-Quran khusus untuk bangsa Arab sahaja, manakala kitab terdahulu bersifat universal untuk seluruh alam."
+                ],
+                correctIndex: 2, // Jawapan C
+                explanation: "Terhadap kitab lama, kita wajib beriman bahawa ia pernah diturunkan Allah. Namun terhadap Al-Quran, keimanan menuntut untuk mempelajari, memahami, dan melaksanakan seluruh syariatnya."
+            },
+            {
+                id: 8,
+                topic: "AL-KITAB",
+                question: "Berdasarkan analisis akidah Islam, bagaimanakah status empat Injil utama (Matius, Mark, Lukas, Johannes) yang berada dalam Perjanjian Baru hari ini?",
+                options: [
+                    "A. Ia merupakan wahyu asli yang ditulis secara langsung oleh Nabi Isa a.s. semasa baginda di dunia.",
+                    "B. Ia merupakan karangan dan catatan pengikut manusia, bukannya kalam/wahyu mutlak yang diturunkan Ilahi.",
+                    "C. Ia adalah gabungan tepat antara Kitab Zabur dan Taurat yang disahkan oleh para sahabat baginda.",
+                    "D. Ia merupakan suhuf yang diberikan kepada Nabi Ibrahim a.s. yang diterjemahkan."
+                ],
+                correctIndex: 1, // Jawapan B
+                explanation: "Injil Matius, Mark, Lukas, dan Johannes merupakan hasil karangan manusia/sejarahwan selepas ketiadaan Nabi Isa a.s. dan bukan lagi firman wahyu mutlak daripada Allah SWT."
+            },
+            {
+                id: 9,
+                topic: "AL-KITAB",
+                question: "Bagaimanakah jaminan keaslian Al-Quran dipelihara dan apakah rasional Bahasa Arabnya kekal relevan 'Sholeh Likulli Zaman wa Makan'?",
+                options: [
+                    "A. Al-Quran dipelihara oleh lembaga penterjemah antarabangsa dan bahasanya sentiasa berubah mengikut zaman.",
+                    "B. Keaslian Al-Quran bergantung kepada simpanan manuskrip tertua di muzium semata-mata.",
+                    "C. Al-Quran dibolehkan dipinda hukumnya sekiranya tidak sesuai dengan pemikiran moden.",
+                    "D. Allah SWT menjamin pemeliharaan Al-Quran secara mutlak (Surah al-Hijr: 9) dan Bahasa Arab Al-Quran kekal dipelihara serta difahami sepanjang zaman."
+                ],
+                correctIndex: 3, // Jawapan D
+                explanation: "Firman Allah SWT dalam Surah al-Hijr ayat 9 menjamin pemeliharaan Al-Quran. Bahasa Arab Al-Quran kekal hidup dan terpelihara struktur dan maknanya hingga hari Kiamat."
+            },
+            {
+                id: 10,
+                topic: "NUBUWWAH & KITAB",
+                question: "Bagaimanakah hubungan komplementari (saling melengkapi) antara Al-Nubuwwah dan Al-Kitab berfungsi dalam menyempurnakan risalah Islam?",
+                options: [
+                    "A. Nabi/Rasul bertindak sebagai pembawa wahyu, pengamal, dan pentafsir amali (Qudwah Hasanah) bagi kandungan Al-Kitab.",
+                    "B. Al-Kitab berdiri sendiri tanpa memerlukan Rasul untuk membacakan dan menjelaskan kandungannya.",
+                    "C. Al-Nubuwwah menafikan kepentingan Al-Kitab kerana Rasul berhak mereka syariat baharu.",
+                    "D. Al-Kitab diturunkan hanya untuk bacaan ritual tanpa ada kaitan dengan tugasan Kerasulan."
+                ],
+                correctIndex: 0, // Jawapan A
+                explanation: "Al-Kitab menyediakan teks perundangan dan wahyu, manakala Al-Nubuwwah (Nabi/Rasul) menterjemahkannya dalam bentuk amalan hidup (Qudwah Hasanah) untuk diteladani manusia."
+            }
+        ];
+
+        /* =========================================================
+         * 2. STATE PERMAINAN (GAME STATE VARIABLES)
+         * ========================================================= */
+        let studentName = "";
+        let studentClass = "";
+        let currentCheckpoint = 0; // Index 0..9
+        let totalScore = 0;
+        let wrongAttemptsPerQuestion = new Array(10).fill(0);
+        let firstTryCorrect = new Array(10).fill(true);
+        let isQuestionModalOpen = false;
+
+        /* =========================================================
+         * 3. WEB AUDIO SYNTHESIZER (PURE JS AUDIO API)
+         * ========================================================= */
+        let audioCtx = null;
+        let isMuted = false;
+
+        function initAudio() {
+            if (!audioCtx) {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                audioCtx = new AudioContext();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        function toggleSound() {
+            isMuted = !isMuted;
+            const btn = document.getElementById('btn-sound-toggle');
+            btn.textContent = isMuted ? "🔇" : "🔊";
+        }
+
+        function playSound(type) {
+            if (isMuted) return;
+            initAudio();
+            if (!audioCtx) return;
+
+            const now = audioCtx.currentTime;
+
+            if (type === 'jump') {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(150, now);
+                osc.frequency.exponentialRampToValueAtTime(600, now + 0.15);
+                gain.gain.setValueAtTime(0.15, now);
+                gain.gain.linearRampToValueAtTime(0.01, now + 0.15);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(now);
+                osc.stop(now + 0.15);
+            } 
+            else if (type === 'coin') {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(987.77, now); // B5
+                osc.frequency.setValueAtTime(1318.51, now + 0.08); // E6
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.linearRampToValueAtTime(0.01, now + 0.3);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(now);
+                osc.stop(now + 0.3);
+            }
+            else if (type === 'correct') {
+                // Upward Arpeggio C5 -> E5 -> G5 -> C6
+                const notes = [523.25, 659.25, 783.99, 1046.50];
+                notes.forEach((freq, index) => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, now + index * 0.08);
+                    gain.gain.setValueAtTime(0.2, now + index * 0.08);
+                    gain.gain.linearRampToValueAtTime(0.01, now + index * 0.08 + 0.15);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(now + index * 0.08);
+                    osc.stop(now + index * 0.08 + 0.15);
+                });
+            }
+            else if (type === 'wrong') {
+                // Buzzing low pitch descending sweep
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(220, now);
+                osc.frequency.linearRampToValueAtTime(110, now + 0.35);
+                gain.gain.setValueAtTime(0.25, now);
+                gain.gain.linearRampToValueAtTime(0.01, now + 0.35);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(now);
+                osc.stop(now + 0.35);
+            }
+            else if (type === 'fanfare') {
+                // Triumphant Mario stage clear fanfare
+                const notes = [
+                    {f: 523.25, d: 0.15, t: 0},
+                    {f: 659.25, d: 0.15, t: 0.15},
+                    {f: 783.99, d: 0.15, t: 0.30},
+                    {f: 1046.50, d: 0.40, t: 0.45}
+                ];
+                notes.forEach(n => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'square';
+                    osc.frequency.setValueAtTime(n.f, now + n.t);
+                    gain.gain.setValueAtTime(0.2, now + n.t);
+                    gain.gain.linearRampToValueAtTime(0.01, now + n.t + n.d);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(now + n.t);
+                    osc.stop(now + n.t + n.d);
+                });
+            }
+        }
+
+        /* =========================================================
+         * 4. AUTO UPPERCASE & FORM VALIDATION
+         * ========================================================= */
+        const inputName = document.getElementById('input-name');
+        const inputClass = document.getElementById('input-class');
+        const btnStart = document.getElementById('btn-start');
+
+        [inputName, inputClass].forEach(input => {
+            input.addEventListener('input', function() {
+                // Auto convert to uppercase
+                this.value = this.value.toUpperCase();
+                validateForm();
+            });
+        });
+
+        function validateForm() {
+            if (inputName.value.trim().length >= 2 && inputClass.value.trim().length >= 2) {
+                btnStart.disabled = false;
+            } else {
+                btnStart.disabled = true;
+            }
+        }
+
+        /* =========================================================
+         * 5. MARIO LEVEL CANVAS ENGINE
+         * ========================================================= */
+        const canvas = document.getElementById('mario-canvas');
+        const ctx = canvas.getContext('2d');
+
+        // Mario Position Animation Object
+        let marioState = {
+            x: 40,
+            y: 190,
+            targetX: 40,
+            isJumping: false,
+            jumpFrame: 0,
+            isRunning: false,
+            facingRight: true
+        };
+
+        function drawBackground() {
+            // Sky
+            ctx.fillStyle = "#5c94fc";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Clouds
+            drawCloud(100, 40, 60);
+            drawCloud(350, 30, 80);
+            drawCloud(650, 50, 70);
+
+            // Ground tiles
+            const groundY = 230;
+            ctx.fillStyle = "#e45c10"; // Brick Brown
+            ctx.fillRect(0, groundY, canvas.width, canvas.height - groundY);
+
+            // Ground Brick Grid pattern
+            ctx.strokeStyle = "#000000";
+            ctx.lineWidth = 2;
+            for (let x = 0; x < canvas.width; x += 30) {
+                ctx.strokeRect(x, groundY, 30, 25);
+                ctx.strokeRect(x, groundY + 25, 30, 25);
+            }
+
+            // Green Pipes at intervals
+            drawPipe(280, groundY - 40);
+            drawPipe(620, groundY - 50);
+
+            // Flagpole at Castle (End Goal Checkpoint 10)
+            drawFlagpole(830, groundY);
+
+            // Checkpoint Question Blocks (10 blocks along the map)
+            for (let i = 0; i < 10; i++) {
+                const blockX = 60 + i * 75;
+                const blockY = 130 - (i % 2 === 0 ? 0 : 25); // Alternate heights
+                const isReached = i <= currentCheckpoint;
+                const isCurrent = i === currentCheckpoint;
+                drawQuestionBlock(blockX, blockY, i + 1, isReached, isCurrent);
+            }
+        }
+
+        function drawCloud(x, y, radius) {
+            ctx.fillStyle = "#ffffff";
+            ctx.beginPath();
+            ctx.arc(x, y, radius * 0.4, 0, Math.PI * 2);
+            ctx.arc(x + radius * 0.3, y - radius * 0.2, radius * 0.35, 0, Math.PI * 2);
+            ctx.arc(x + radius * 0.6, y, radius * 0.3, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        function drawPipe(x, y) {
+            // Main Pipe Body
+            ctx.fillStyle = "#00a800";
+            ctx.fillRect(x, y, 40, 230 - y);
+            ctx.fillRect(x - 4, y, 48, 14);
+
+            // Pipe Highlights & Outlines
+            ctx.strokeStyle = "#000000";
+            ctx.lineWidth = 2;
+            ctx.strokeRect(x, y, 40, 230 - y);
+            ctx.strokeRect(x - 4, y, 48, 14);
+
+            // Inner Light Green Stripe
+            ctx.fillStyle = "#80d010";
+            ctx.fillRect(x + 6, y + 14, 6, 230 - y - 14);
+            ctx.fillRect(x + 4, y + 2, 6, 10);
+        }
+
+        function drawFlagpole(x, groundY) {
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(x, groundY - 140, 6, 140);
+            ctx.fillStyle = "#f8b800";
+            ctx.beginPath();
+            ctx.arc(x + 3, groundY - 145, 8, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Flag
+            ctx.fillStyle = "#e52521";
+            ctx.beginPath();
+            ctx.moveTo(x + 6, groundY - 135);
+            ctx.lineTo(x + 40, groundY - 120);
+            ctx.lineTo(x + 6, groundY - 105);
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        function drawQuestionBlock(x, y, num, isReached, isCurrent) {
+            ctx.save();
+            ctx.translate(x, y);
+
+            if (isCurrent) {
+                // Pulsing yellow highlight for active block
+                const pulse = Math.sin(Date.now() / 150) * 2;
+                ctx.fillStyle = "#f8b800";
+                ctx.fillRect(-15 - pulse, -15 - pulse, 30 + pulse * 2, 30 + pulse * 2);
+            } else if (isReached) {
+                // Hit metal block
+                ctx.fillStyle = "#808080";
+                ctx.fillRect(-15, -15, 30, 30);
+            } else {
+                // Regular golden block
+                ctx.fillStyle = "#f8b800";
+                ctx.fillRect(-15, -15, 30, 30);
+            }
+
+            // Outline
+            ctx.strokeStyle = "#000000";
+            ctx.lineWidth = 2;
+            ctx.strokeRect(-15, -15, 30, 30);
+
+            // Text on Block
+            ctx.fillStyle = isReached && !isCurrent ? "#ffffff" : "#000000";
+            ctx.font = "bold 12px 'Press Start 2P', cursive";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText(isReached && !isCurrent ? "✓" : num, 0, 1);
+
+            ctx.restore();
+        }
+
+        function drawMario() {
+            ctx.save();
+            ctx.translate(marioState.x, marioState.y);
+
+            // Scale sprite direction
+            if (!marioState.facingRight) ctx.scale(-1, 1);
+
+            // Mario Pixel Art Composite Render
+            // Red Cap
+            ctx.fillStyle = "#e52521";
+            ctx.fillRect(-8, -26, 16, 6);
+            ctx.fillRect(-6, -28, 12, 3);
+
+            // Face / Skin
+            ctx.fillStyle = "#ffcc99";
+            ctx.fillRect(-6, -20, 12, 8);
+
+            // Eyes & Mustache
+            ctx.fillStyle = "#000000";
+            ctx.fillRect(2, -18, 3, 3); // Eye
+            ctx.fillRect(-4, -14, 12, 3); // Mustache
+
+            // Red Shirt
+            ctx.fillStyle = "#e52521";
+            ctx.fillRect(-8, -12, 16, 8);
+
+            // Blue Overalls
+            ctx.fillStyle = "#0000d0";
+            ctx.fillRect(-6, -8, 12, 10);
+            // Yellow Buttons
+            ctx.fillStyle = "#f8b800";
+            ctx.fillRect(-4, -6, 2, 2);
+            ctx.fillRect(2, -6, 2, 2);
+
+            // Arms & Shoes
+            ctx.fillStyle = "#801800"; // Brown Shoes
+            if (marioState.isJumping) {
+                ctx.fillRect(-10, 2, 8, 5);
+                ctx.fillRect(2, -2, 8, 5);
+            } else {
+                ctx.fillRect(-8, 2, 7, 5);
+                ctx.fillRect(1, 2, 7, 5);
+            }
+
+            ctx.restore();
+        }
+
+        // Animation Loop for Canvas
+        function animateCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawBackground();
+
+            // Smooth Interpolation Movement for Mario
+            if (Math.abs(marioState.x - marioState.targetX) > 2) {
+                marioState.isRunning = true;
+                if (marioState.x < marioState.targetX) {
+                    marioState.x += 4;
+                    marioState.facingRight = true;
+                } else {
+                    marioState.x -= 4;
+                    marioState.facingRight = false;
+                }
+
+                // Simulate Jump Arc
+                const dist = Math.abs(marioState.x - marioState.targetX);
+                if (dist > 20) {
+                    marioState.isJumping = true;
+                    marioState.y = 190 - Math.sin((dist / 100) * Math.PI) * 40;
+                } else {
+                    marioState.isJumping = false;
+                    marioState.y = 190;
+                }
+            } else {
+                marioState.x = marioState.targetX;
+                marioState.y = 190;
+                marioState.isRunning = false;
+                marioState.isJumping = false;
+            }
+
+            drawMario();
+            requestAnimationFrame(animateCanvas);
+        }
+
+        /* =========================================================
+         * 6. ALUR UTAMA PERMAINAN (GAMEPLAY FLOW)
+         * ========================================================= */
+        function startGame() {
+            initAudio();
+            studentName = inputName.value.trim().toUpperCase();
+            studentClass = inputClass.value.trim().toUpperCase();
+
+            // Reset Game Variables
+            currentCheckpoint = 0;
+            totalScore = 0;
+            wrongAttemptsPerQuestion.fill(0);
+            firstTryCorrect.fill(true);
+
+            // Update HUD
+            document.getElementById('hud-student-name').textContent = studentName;
+            document.getElementById('hud-student-class').textContent = studentClass;
+            updateHUD();
+
+            // Switch Screens
+            document.getElementById('screen-start').classList.add('hidden');
+            document.getElementById('mario-hud').classList.remove('hidden');
+            document.getElementById('screen-game').classList.remove('hidden');
+
+            // Set Mario Initial Target Position
+            marioState.x = 40;
+            marioState.targetX = 60; // Block 1
+            animateCanvas();
+
+            // Open Question Modal for Checkpoint 1
+            setTimeout(() => {
+                openCurrentQuestionModal();
+            }, 600);
+        }
+
+        function updateHUD() {
+            document.getElementById('hud-score').textContent = String(totalScore).padStart(3, '0');
+            document.getElementById('hud-checkpoint').textContent = `${currentCheckpoint + 1}/10`;
+            
+            // Progress bar
+            const pct = ((currentCheckpoint + 1) / 10) * 100;
+            document.getElementById('game-progress-bar').style.width = `${pct}%`;
+
+            // Banner & Button Tags
+            document.getElementById('banner-checkpoint-num').textContent = currentCheckpoint + 1;
+            document.getElementById('btn-checkpoint-tag').textContent = currentCheckpoint + 1;
+        }
+
+        function openCurrentQuestionModal() {
+            if (currentCheckpoint >= 10) return;
+
+            const q = QUIZ_BANK[currentCheckpoint];
+            
+            document.getElementById('modal-cp-num').textContent = currentCheckpoint + 1;
+            document.getElementById('modal-topic-tag').textContent = q.topic;
+            document.getElementById('modal-question-text').textContent = q.question;
+
+            // Reset Feedback Box & Next Button
+            const feedbackBox = document.getElementById('modal-feedback');
+            feedbackBox.className = "hidden p-3 rounded-lg text-xs sm:text-sm font-sans font-bold border mb-3";
+            feedbackBox.textContent = "";
+
+            document.getElementById('btn-next-checkpoint').classList.add('hidden');
+
+            // Render Options
+            const container = document.getElementById('modal-options-container');
+            container.innerHTML = "";
+
+            q.options.forEach((optText, index) => {
+                const optBtn = document.createElement('button');
+                optBtn.className = "opt-btn w-full text-left p-3.5 bg-slate-800 hover:bg-slate-700 border-2 border-slate-600 hover:border-amber-400 rounded-lg text-xs sm:text-sm font-sans text-white transition-all duration-150 flex items-start gap-2.5 cursor-pointer";
+                optBtn.innerHTML = `<span class="font-bold text-amber-400 shrink-0">${optText.substring(0, 2)}</span> <span>${optText.substring(3)}</span>`;
+                optBtn.onclick = () => handleAnswerSelect(index, optBtn);
+                container.appendChild(optBtn);
+            });
+
+            // Show Modal
+            document.getElementById('quiz-modal').classList.remove('hidden');
+            isQuestionModalOpen = true;
+        }
+
+        function handleAnswerSelect(selectedIndex, btnElement) {
+            const q = QUIZ_BANK[currentCheckpoint];
+            const feedbackBox = document.getElementById('modal-feedback');
+
+            if (selectedIndex === q.correctIndex) {
+                // JAWAPAN BETUL!
+                playSound('correct');
+                playSound('coin');
+
+                // Award 10 marks
+                totalScore += 10;
+                updateHUD();
+
+                // Highlight Correct Button
+                btnElement.className = "w-full text-left p-3.5 bg-green-900/90 border-2 border-green-400 rounded-lg text-xs sm:text-sm font-sans text-green-100 flex items-start gap-2.5 font-bold shadow-lg";
+
+                // Disable all option buttons
+                document.querySelectorAll('.opt-btn').forEach(b => b.disabled = true);
+
+                // Show Correct Feedback + Explanation
+                feedbackBox.className = "p-3.5 rounded-lg text-xs sm:text-sm font-sans font-bold bg-green-950 border-2 border-green-500 text-green-300 mb-3 space-y-1 block";
+                feedbackBox.innerHTML = `
+                    <div class="text-green-400 font-arcade text-xs">🎉 TAHNIAH! JAWAPAN TEPAT (+10 MARKAH)</div>
+                    <div>${q.explanation}</div>
+                `;
+
+                // Show Next Button
+                document.getElementById('btn-next-checkpoint').classList.remove('hidden');
+
+            } else {
+                // JAWAPAN SALAH!
+                playSound('wrong');
+
+                // Track Mistakes
+                wrongAttemptsPerQuestion[currentCheckpoint]++;
+                firstTryCorrect[currentCheckpoint] = false;
+
+                // Deduct 5 marks penalty
+                totalScore -= 5;
+                updateHUD();
+
+                // Shake Modal
+                const modalCard = document.getElementById('quiz-modal-card');
+                modalCard.classList.add('animate-shake');
+                setTimeout(() => modalCard.classList.remove('animate-shake'), 400);
+
+                // Highlight Wrong Button (red) and disable it so student picks another
+                btnElement.disabled = true;
+                btnElement.className = "w-full text-left p-3.5 bg-red-950/80 border-2 border-red-500 rounded-lg text-xs sm:text-sm font-sans text-red-300 opacity-60 cursor-not-allowed flex items-start gap-2.5";
+
+                // Show Penalty Feedback
+                feedbackBox.className = "p-3 rounded-lg text-xs sm:text-sm font-sans font-bold bg-red-950 border border-red-500 text-red-300 mb-3 block";
+                feedbackBox.textContent = `❌ Jawapan kurang tepat! Penalti -5 markah dikenakan. Sila cuba jawapan lain! (Percubaan salah: ${wrongAttemptsPerQuestion[currentCheckpoint]})`;
+            }
+        }
+
+        function advanceCheckpoint() {
+            // Close Question Modal
+            document.getElementById('quiz-modal').classList.add('hidden');
+            isQuestionModalOpen = false;
+
+            // Increment Checkpoint
+            currentCheckpoint++;
+
+            if (currentCheckpoint >= 10) {
+                // GAME COMPLETED!
+                playSound('fanfare');
+                setTimeout(() => {
+                    showFinalResults();
+                }, 800);
+            } else {
+                // Move Mario on Canvas to next Checkpoint Block
+                playSound('jump');
+                marioState.targetX = 60 + currentCheckpoint * 75;
+                updateHUD();
+
+                // Open Modal for next checkpoint automatically after Mario reaches
+                setTimeout(() => {
+                    openCurrentQuestionModal();
+                }, 1200);
+            }
+        }
+
+        /* =========================================================
+         * 7. SKRIN KEPUTUSAN AKHIR (RESULT SCREEN)
+         * ========================================================= */
+        function showFinalResults() {
+            document.getElementById('screen-game').classList.add('hidden');
+            document.getElementById('screen-result').classList.remove('hidden');
+
+            // Populate Student Info
+            document.getElementById('res-student-name').textContent = studentName;
+            document.getElementById('res-student-class').textContent = studentClass;
+            document.getElementById('res-final-score').textContent = totalScore;
+
+            // Total Wrong Attempts
+            const totalWrong = wrongAttemptsPerQuestion.reduce((a, b) => a + b, 0);
+            document.getElementById('res-wrong-count').textContent = totalWrong;
+
+            // First Try Accuracy %
+            const numFirstTryCorrect = firstTryCorrect.filter(val => val === true).length;
+            const accuracyPct = Math.round((numFirstTryCorrect / 10) * 100);
+            document.getElementById('res-accuracy').textContent = `${accuracyPct}%`;
+
+            // Calculate Grade / Title
+            const gradeTitleElem = document.getElementById('res-grade-title');
+            if (totalScore >= 90) {
+                gradeTitleElem.textContent = "🏆 ANUGERAH CANSELOR AKIDAH (MUMTAZ / CEMERLANG TINGGI)";
+                gradeTitleElem.className = "text-xs sm:text-sm font-bold font-sans text-amber-300 block mt-1";
+            } else if (totalScore >= 75) {
+                gradeTitleElem.textContent = "🌟 JAYYID JIDDAN (SANGAT BAIK)";
+                gradeTitleElem.className = "text-xs sm:text-sm font-bold font-sans text-green-400 block mt-1";
+            } else if (totalScore >= 60) {
+                gradeTitleElem.textContent = "👍 JAYYID (BAIK / LULUS)";
+                gradeTitleElem.className = "text-xs sm:text-sm font-bold font-sans text-blue-400 block mt-1";
+            } else {
+                gradeTitleElem.textContent = "📖 PERLU REVISI SEMULA (MAQBUL MASHRUT)";
+                gradeTitleElem.className = "text-xs sm:text-sm font-bold font-sans text-mario-red block mt-1";
+            }
+
+            // Populate Breakdown Table
+            const tbody = document.getElementById('res-table-body');
+            tbody.innerHTML = "";
+
+            QUIZ_BANK.forEach((q, idx) => {
+                const tr = document.createElement('tr');
+                const wrongCount = wrongAttemptsPerQuestion[idx];
+                const wasFirstTry = firstTryCorrect[idx];
+
+                tr.innerHTML = `
+                    <td class="p-2.5 text-center font-arcade text-amber-400">${idx + 1}</td>
+                    <td class="p-2.5">
+                        <span class="font-bold block text-white">${q.topic}</span>
+                        <span class="text-slate-400 text-[11px] block truncate max-w-xs sm:max-w-md">${q.question}</span>
+                    </td>
+                    <td class="p-2.5 text-center font-bold ${wrongCount > 0 ? 'text-red-400' : 'text-slate-400'}">${wrongCount} Kali</td>
+                    <td class="p-2.5 text-center">
+                        ${wasFirstTry 
+                            ? '<span class="bg-green-900/80 text-green-300 border border-green-500 text-[10px] font-bold px-2 py-0.5 rounded">1ST TRY</span>' 
+                            : '<span class="bg-amber-900/80 text-amber-300 border border-amber-500 text-[10px] font-bold px-2 py-0.5 rounded">RETRY</span>'}
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function restartGame() {
+            document.getElementById('screen-result').classList.add('hidden');
+            document.getElementById('mario-hud').classList.add('hidden');
+            document.getElementById('screen-start').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
